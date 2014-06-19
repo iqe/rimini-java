@@ -94,14 +94,14 @@ public class MessageSourceTest {
     }
 
     private void expectMessage(TestListener listener, String content) throws InterruptedException {
-        Message message = listener.messages.poll(100, TimeUnit.MILLISECONDS);
-        assertNotNull(message);
+        Message message = listener.messages.poll(1000, TimeUnit.MILLISECONDS);
+        assertNotNull(String.format("Expected '%s', but did not receive any message", content), message);
         assertEquals(content, message.getContent());
     }
 
     private void expectNoMessage(TestListener listener) throws InterruptedException {
         Message message = listener.messages.poll(50, TimeUnit.MILLISECONDS);
-        assertNull(message);
+        assertNull(String.format("Did not expect any message, but got %s", message), message);
     }
 
     private final class TestListener implements MessageSourceListener {
