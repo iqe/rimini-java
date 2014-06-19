@@ -130,7 +130,7 @@ public class MessageSource extends AbstractExecutionThreadService {
                 while (true) {
                     try {
                         Message message = stream.readMessage();
-                        log.debug("Received message '{}'", message);
+                        log.debug("Received message {}", message);
                         if (message.getAddress().getFeatureId() == 1) { // FIXME magic constant!
                             int currentStreamId = stream.getStreamId();
                             int newStreamId = (Integer) message.getContent();
