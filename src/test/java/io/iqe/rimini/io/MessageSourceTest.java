@@ -16,8 +16,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.util.concurrent.Service.State;
 
 public class MessageSourceTest {
     private QueueInputStream input;
@@ -47,76 +50,58 @@ public class MessageSourceTest {
         source.addListener(new Address(5, 43), s5f43Listener);
         source.addListener(new Address(6, 42), s6f42Listener);
         source.addStream(stream);
+
+        features.addFeature(42, new SimpleTextFeature());
+
+        source.startAsync();
+        source.awaitRunning();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (source != null && source.state() == State.RUNNING) {
+            source.stopAsync();
+            source.awaitTerminated();
+        }
     }
 
     @Test
     public void shouldForwardMessageToRegisteredListeners() throws Exception {
-        try {
-            // given
-            source.startAsync();
-            source.awaitRunning();
+        // when
+        input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
 
-            features.addFeature(42, new SimpleTextFeature());
-
-            // when
-            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
-
-            // then
-            expectMessage(s5f42Listener, "ABC");
-            expectNoMessage(s5f43Listener);
-            expectNoMessage(s6f42Listener);
-        } finally {
-            source.stopAsync();
-            source.awaitTerminated();
-        }
+        // then
+        expectMessage(s5f42Listener, "ABC");
+        expectNoMessage(s5f43Listener);
+        expectNoMessage(s6f42Listener);
     }
 
     @Test
     public void shouldAllowAddingListenersWhileRunning() throws Exception {
-        try {
-            // given
-            source.startAsync();
-            source.awaitRunning();
+        // given
+        TestListener listener = new TestListener();
+        source.addListener(new Address(5, 42), listener);
 
-            features.addFeature(42, new SimpleTextFeature());
+        // when
+        input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
 
-            TestListener listener = new TestListener();
-            source.addListener(new Address(5, 42), listener);
-
-            // when
-            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
-
-            // then
-            expectMessage(listener, "ABC");
-        } finally {
-            source.stopAsync();
-            source.awaitTerminated();
-        }
+        // then
+        expectMessage(listener, "ABC");
     }
 
     @Test
     public void shouldAllowRemovingListenersWhileRunning() throws Exception {
-        try {
-            // given
-            source.startAsync();
-            source.awaitRunning();
+        // given
+        TestListener listener = new TestListener();
 
-            features.addFeature(42, new SimpleTextFeature());
+        // when, then
+        source.addListener(new Address(5, 42), listener);
+        input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
+        expectMessage(listener, "ABC");
 
-            TestListener listener = new TestListener();
-
-            // when, then
-            source.addListener(new Address(5, 42), listener);
-            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
-            expectMessage(listener, "ABC");
-
-            source.removeListener(new Address(5, 42), listener);
-            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
-            expectNoMessage(listener);
-        } finally {
-            source.stopAsync();
-            source.awaitTerminated();
-        }
+        source.removeListener(new Address(5, 42), listener);
+        input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
+        expectNoMessage(listener);
     }
 
     private void expectMessage(TestListener listener, String content) throws InterruptedException {
