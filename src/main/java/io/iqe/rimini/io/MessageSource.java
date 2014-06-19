@@ -33,8 +33,10 @@ public class MessageSource extends AbstractExecutionThreadService {
         MessageReader reader = new MessageReader(stream);
         readers.add(reader);
 
-        reader.startAsync();
-        reader.awaitRunning();
+        if (isRunning()) {
+            reader.startAsync();
+            reader.awaitRunning();
+        }
     }
 
     public void removeStream(MessageStream stream) {
@@ -42,8 +44,10 @@ public class MessageSource extends AbstractExecutionThreadService {
             if (reader.stream.equals(stream)) {
                 readers.remove(reader);
 
-                reader.stopAsync();
-                reader.awaitTerminated();
+                if (isRunning()) {
+                    reader.stopAsync();
+                    reader.awaitTerminated();
+                }
                 return;
             }
         }
