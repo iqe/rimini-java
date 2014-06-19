@@ -2,24 +2,32 @@ package io.iqe.rimini.io.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class QueueOutputStream extends OutputStream {
 	private boolean closed;
-	private Queue<Byte> bytes;
+	private BlockingQueue<Integer> bytes;
 
 	public QueueOutputStream() {
-		this(new LinkedBlockingQueue<Byte>());
+		this(new LinkedBlockingQueue<Integer>());
 	}
 
-	public QueueOutputStream(Queue<Byte> bytes) {
+	public QueueOutputStream(BlockingQueue<Integer> bytes) {
 		this.bytes = bytes;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
-		bytes.add((byte)b);
+	    if ((byte)b != b) {
+            throw new IOException(String.format("%d is not a valid byte value", b));
+        }
+
+		try {
+            bytes.put(b);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
 	}
 
 	@Override
@@ -28,17 +36,21 @@ public class QueueOutputStream extends OutputStream {
 		closed = true;
 	}
 
-    public byte[] readAll() {
+    public byte[] readAll() throws IOException {
+        // Note: This breaks if multiple threads read at the same time!
         byte[] b = new byte[bytes.size()];
         for (int i = 0; i < b.length; i++) {
-            b[i] = bytes.poll();
+            b[i] = (byte)read();
         }
         return b;
     }
 
-    public int read() {
-        Byte b = bytes.poll();
-        return b == null ? -1 : b & 0xFF;
+    public int read() throws IOException {
+        try {
+            return bytes.take();
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
     }
 
     public void clear() {
