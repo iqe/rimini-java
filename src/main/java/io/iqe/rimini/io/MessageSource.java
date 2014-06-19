@@ -22,7 +22,7 @@ public class MessageSource extends AbstractExecutionThreadService {
 
     private LinkedBlockingQueue<Message> messageQueue;
     private CopyOnWriteArraySet<MessageReader> readers;
-    private HashMultimap<Integer, MessageSourceListener> listeners;
+    private HashMultimap<Address, MessageSourceListener> listeners;
 
     public MessageSource() {
         messageQueue = new LinkedBlockingQueue<>();
@@ -54,12 +54,12 @@ public class MessageSource extends AbstractExecutionThreadService {
         }
     }
 
-    public void addListener(int streamId, MessageSourceListener listener) {
-        listeners.put(streamId, listener);
+    public void addListener(Address address, MessageSourceListener listener) {
+        listeners.put(address, listener);
     }
 
-    public void removeListener(int streamId, MessageSourceListener listener) {
-        listeners.remove(streamId, listener);
+    public void removeListener(Address address, MessageSourceListener listener) {
+        listeners.remove(address, listener);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class MessageSource extends AbstractExecutionThreadService {
                     break;
                 }
 
-                for (MessageSourceListener listener : listeners.get(message.getAddress().getStreamId())) {
+                for (MessageSourceListener listener : listeners.get(message.getAddress())) {
                     try {
                         listener.onMessage(message);
                     } catch (Exception e) {

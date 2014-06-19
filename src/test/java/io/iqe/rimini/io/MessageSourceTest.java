@@ -2,6 +2,7 @@ package io.iqe.rimini.io;
 
 import static io.iqe.rimini.io.test.MessageStreamTestSupport.*;
 import static org.junit.Assert.*;
+import io.iqe.rimini.Address;
 import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.Message;
 import io.iqe.rimini.MessageSourceListener;
@@ -23,8 +24,9 @@ public class MessageSourceTest {
     private QueueOutputStream output;
     private FeatureRepository features;
     private MessageStream stream;
-    private TestListener stream5Listener;
-    private TestListener stream6Listener;
+    private TestListener s5f42Listener;
+    private TestListener s5f43Listener;
+    private TestListener s6f42Listener;
 
     private MessageSource source;
 
@@ -35,13 +37,15 @@ public class MessageSourceTest {
 
         features = new FeatureRepository();
         stream = new MessageStream(5, new WaspInputStream(input), new WaspOutputStream(output), features);
-        stream5Listener = new TestListener();
-        stream6Listener = new TestListener();
+        s5f42Listener = new TestListener();
+        s5f43Listener = new TestListener();
+        s6f42Listener = new TestListener();
 
         source = new MessageSource();
 
-        source.addListener(5, stream5Listener);
-        source.addListener(6, stream6Listener);
+        source.addListener(new Address(5, 42), s5f42Listener);
+        source.addListener(new Address(5, 43), s5f43Listener);
+        source.addListener(new Address(6, 42), s6f42Listener);
         source.addStream(stream);
     }
 
@@ -58,8 +62,9 @@ public class MessageSourceTest {
             input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
 
             // then
-            expectMessage(stream5Listener, "ABC");
-            expectNoMessage(stream6Listener);
+            expectMessage(s5f42Listener, "ABC");
+            expectNoMessage(s5f43Listener);
+            expectNoMessage(s6f42Listener);
         } finally {
             source.stopAsync();
             source.awaitTerminated();
