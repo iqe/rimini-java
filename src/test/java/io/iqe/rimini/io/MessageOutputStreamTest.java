@@ -5,6 +5,7 @@ import static io.iqe.rimini.io.test.MessageStreamTestSupport.*;
 
 import java.nio.BufferOverflowException;
 
+import io.iqe.rimini.Address;
 import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.Message;
 import io.iqe.rimini.io.test.QueueOutputStream;
@@ -33,7 +34,7 @@ public class MessageOutputStreamTest {
     @Test
     public void shouldUseFeatureToWriteMessage() throws Exception {
         // given
-        Message message = new Message(5, 42, "ABC");
+        Message message = createMessage(5, 42, "ABC");
 
         // when
         stream.writeMessage(message);
@@ -47,18 +48,18 @@ public class MessageOutputStreamTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowOnInvalidStreamId() throws Exception {
-        stream.writeMessage(new Message(1, 42, "ABC"));
+        stream.writeMessage(createMessage(1, 42, "ABC"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowOnMissingFeature() throws Exception {
-        stream.writeMessage(new Message(5, 43, "ABC"));
+        stream.writeMessage(createMessage(5, 43, "ABC"));
     }
 
     @Test
     public void shouldAcceptMessageUpToMaxSize() throws Exception {
         // given
-        Message message = new Message(5, 42, "ABCDEFG");
+        Message message = createMessage(5, 42, "ABCDEFG");
 
         // when
         stream.writeMessage(message);
@@ -72,7 +73,7 @@ public class MessageOutputStreamTest {
 
     @Test(expected = BufferOverflowException.class)
     public void shouldThrowIfMessageIsTooLong() throws Exception {
-        Message message = new Message(5, 42, "ABCDEFGH");
+        Message message = createMessage(5, 42, "ABCDEFGH");
         stream.writeMessage(message);
     }
 
@@ -80,5 +81,9 @@ public class MessageOutputStreamTest {
     public void shouldCloseUnderlyingStream() throws Exception {
         stream.close();
         assertTrue(output.isClosed());
+    }
+
+    private Message createMessage(int streamId, int featureId, String content) {
+        return new Message(new Address(streamId, featureId), content);
     }
 }

@@ -1,6 +1,7 @@
 package io.iqe.rimini.io;
 
 import io.iqe.nio.MultiSignByteBuffer;
+import io.iqe.rimini.Address;
 import io.iqe.rimini.Feature;
 import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.Message;
@@ -51,7 +52,7 @@ public class MessageInputStream implements Closeable {
 
         Object content = feature.readMessageContent(buffer);
 
-        return new Message(streamId, featureId, content);
+        return new Message(new Address(streamId, featureId), content);
     }
 
     /**

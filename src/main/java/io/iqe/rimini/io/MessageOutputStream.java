@@ -1,6 +1,7 @@
 package io.iqe.rimini.io;
 
 import io.iqe.nio.MultiSignByteBuffer;
+import io.iqe.rimini.Address;
 import io.iqe.rimini.Feature;
 import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.Message;
@@ -34,19 +35,21 @@ public class MessageOutputStream implements Closeable {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void writeMessage(Message message) throws IOException {
-        if (streamId != message.getStreamId()) {
+        Address address = message.getAddress();
+
+        if (streamId != address.getStreamId()) {
             throw new IllegalArgumentException(
                     String.format("Stream '%s' can't handle message %s", streamId, message));
         }
 
-        Feature feature = features.getFeature(message.getFeatureId());
+        Feature feature = features.getFeature(address.getFeatureId());
         if (feature == null) {
             throw new IllegalArgumentException(
                     String.format("No feature configured in stream '%s' for message %s", streamId, message));
         }
 
         buffer.rewind();
-        buffer.putUnsignedShort(message.getFeatureId());
+        buffer.putUnsignedShort(address.getFeatureId());
         feature.writeMessageContent(message.getContent(), buffer);
 
         output.writeMessage(buffer.array(), 0, buffer.position());

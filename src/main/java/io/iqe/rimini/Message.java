@@ -1,22 +1,16 @@
 package io.iqe.rimini;
 
 public class Message {
-    private int streamId;
-    private int featureId;
+    private Address address;
     private Object content;
 
-    public Message(int streamId, int featureId, Object content) {
-        this.streamId = streamId;
-        this.featureId = featureId;
+    public Message(Address address, Object content) {
+        this.address = address;
         this.content = content;
     }
 
-    public int getStreamId() {
-        return streamId;
-    }
-
-    public int getFeatureId() {
-        return featureId;
+    public Address getAddress() {
+        return address;
     }
 
     public Object getContent() {
@@ -25,6 +19,6 @@ public class Message {
 
     @Override
     public String toString() {
-        return String.format("S%d.F%d: '%s'", streamId, featureId, content);
+        return String.format("%s: '%s'", address, content);
     }
 }

@@ -49,7 +49,7 @@ public class MessageStream implements Closeable {
     }
 
     public boolean handlesMessage(Message message) {
-        return message.getStreamId() == input.getStreamId();
+        return message.getAddress().getStreamId() == input.getStreamId();
     }
 
     @Override

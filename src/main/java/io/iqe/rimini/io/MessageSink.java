@@ -1,5 +1,6 @@
 package io.iqe.rimini.io;
 
+import io.iqe.rimini.Address;
 import io.iqe.rimini.Message;
 
 import java.util.concurrent.BlockingQueue;
@@ -14,7 +15,7 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 public class MessageSink extends AbstractExecutionThreadService {
     private static final Logger log = LoggerFactory.getLogger("Rimini");
 
-    private static final Message BREAK = new Message(-1, -1, "");
+    private static final Message BREAK = new Message(new Address(-1, -1), "");
 
     private BlockingQueue<Message> messageQueue;
     private CopyOnWriteArraySet<MessageStream> streams;

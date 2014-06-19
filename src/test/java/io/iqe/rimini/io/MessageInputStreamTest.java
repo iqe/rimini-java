@@ -2,6 +2,7 @@ package io.iqe.rimini.io;
 
 import static io.iqe.rimini.io.test.MessageStreamTestSupport.*;
 import static org.junit.Assert.*;
+import io.iqe.rimini.Address;
 import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.Message;
 import io.iqe.rimini.io.test.QueueInputStream;
@@ -37,8 +38,7 @@ public class MessageInputStreamTest {
         Message message = stream.readMessage();
 
         // then
-        assertEquals(5, message.getStreamId());
-        assertEquals(42, message.getFeatureId());
+        assertEquals(new Address(5, 42), message.getAddress());
         assertEquals("ABC", message.getContent());
     }
 

@@ -1,5 +1,6 @@
 package io.iqe.rimini.io;
 
+import io.iqe.rimini.Address;
 import io.iqe.rimini.Message;
 import io.iqe.rimini.MessageSourceListener;
 
@@ -17,7 +18,7 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 public class MessageSource extends AbstractExecutionThreadService {
     private static final Logger log = LoggerFactory.getLogger("Rimini");
 
-    private static final Message BREAK = new Message(-1, -1, "");
+    private static final Message BREAK = new Message(new Address(-1, -1), "");
 
     private LinkedBlockingQueue<Message> messageQueue;
     private CopyOnWriteArraySet<MessageReader> readers;
@@ -85,7 +86,7 @@ public class MessageSource extends AbstractExecutionThreadService {
                     break;
                 }
 
-                for (MessageSourceListener listener : listeners.get(message.getStreamId())) {
+                for (MessageSourceListener listener : listeners.get(message.getAddress().getStreamId())) {
                     try {
                         listener.onMessage(message);
                     } catch (Exception e) {
@@ -130,8 +131,7 @@ public class MessageSource extends AbstractExecutionThreadService {
                     try {
                         Message message = stream.readMessage();
                         log.debug("Received message '{}'", message);
-                        if (message.getFeatureId() == 1) { // FIXME magic
-                                                           // constant!
+                        if (message.getAddress().getFeatureId() == 1) { // FIXME magic constant!
                             int currentStreamId = stream.getStreamId();
                             int newStreamId = (Integer) message.getContent();
 
