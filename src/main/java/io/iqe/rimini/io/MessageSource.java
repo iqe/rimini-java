@@ -142,7 +142,7 @@ public class MessageSource extends AbstractExecutionThreadService {
                         }
                         messageQueue.add(message);
                     } catch (EOFException e) {
-                        log.warn(e.getMessage());
+                        log.debug("Reached end of stream '{}'", stream.getStreamId());
                         break;
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
