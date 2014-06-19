@@ -56,7 +56,7 @@ public class MessageSink extends AbstractExecutionThreadService {
 
                 try {
                     stream.writeMessage(message);
-                    log.debug("Wrote message '{}'", message);
+                    log.debug("Wrote message {}", message);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
