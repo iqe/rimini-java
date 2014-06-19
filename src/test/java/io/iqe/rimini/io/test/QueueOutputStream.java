@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class QueueOutputStream extends OutputStream {
 	private boolean closed;
@@ -46,8 +48,16 @@ public class QueueOutputStream extends OutputStream {
     }
 
     public int read() throws IOException {
+        return read(0);
+    }
+
+    public int read(long timeoutMillis) throws IOException {
         try {
-            return bytes.take();
+            Integer b = bytes.poll(timeoutMillis, TimeUnit.MILLISECONDS);
+            if (b == null) {
+                throw new IOException(String.format("Timed out after %dms", timeoutMillis));
+            }
+            return b;
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
