@@ -62,6 +62,10 @@ public class QueueOutputStream extends OutputStream {
         }
     }
 
+    public boolean hasPendingBytes() {
+        return bytes.peek() != null;
+    }
+
     public void clear() {
         bytes.clear();
     }

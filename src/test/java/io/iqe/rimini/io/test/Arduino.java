@@ -39,4 +39,16 @@ public class Arduino {
     public void sendMessage(int... bytes) throws IOException {
         input.writeAll(message(bytes));
     }
+
+    public byte[] receiveMessage(int expectedByteCount) throws IOException {
+        int[] message = new int[expectedByteCount];
+        for (int i = 0; i < message.length; i++) {
+            message[i] = output.read(1000);
+        }
+        return buildByteArray(message);
+    }
+
+    public boolean hasReceivedBytes() {
+        return output.hasPendingBytes();
+    }
 }
