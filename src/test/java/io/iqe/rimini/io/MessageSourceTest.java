@@ -71,8 +71,57 @@ public class MessageSourceTest {
         }
     }
 
+    @Test
+    public void shouldAllowAddingListenersWhileRunning() throws Exception {
+        try {
+            // given
+            source.startAsync();
+            source.awaitRunning();
+
+            features.addFeature(42, new SimpleTextFeature());
+
+            TestListener listener = new TestListener();
+            source.addListener(new Address(5, 42), listener);
+
+            // when
+            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
+
+            // then
+            expectMessage(listener, "ABC");
+        } finally {
+            source.stopAsync();
+            source.awaitTerminated();
+        }
+    }
+
+    @Test
+    public void shouldAllowRemovingListenersWhileRunning() throws Exception {
+        try {
+            // given
+            source.startAsync();
+            source.awaitRunning();
+
+            features.addFeature(42, new SimpleTextFeature());
+
+            TestListener listener = new TestListener();
+
+            // when, then
+            source.addListener(new Address(5, 42), listener);
+            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
+            expectMessage(listener, "ABC");
+
+            source.removeListener(new Address(5, 42), listener);
+            input.writeAll(message(0, 42, 3, 'A', 'B', 'C'));
+            expectNoMessage(listener);
+        } finally {
+            source.stopAsync();
+            source.awaitTerminated();
+        }
+    }
+
     private void expectMessage(TestListener listener, String content) throws InterruptedException {
         Message message = listener.messages.poll(100, TimeUnit.MILLISECONDS);
+        assertNotNull(message);
         assertEquals(content, message.getContent());
     }
 
