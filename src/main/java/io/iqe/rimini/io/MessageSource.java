@@ -71,36 +71,41 @@ public class MessageSource extends AbstractExecutionThreadService {
     }
 
     @Override
-    protected void run() throws Exception {
-        try {
-            log.info("Started MessageSource");
+    protected void startUp() throws Exception {
+        log.info("Starting MessageSource");
 
-            for (MessageReader reader : readers) {
-                reader.startAsync();
-                reader.awaitRunning();
-            }
-
-            while (isRunning()) {
-                Message message = messageQueue.take();
-                if (message == BREAK) {
-                    break;
-                }
-
-                for (MessageSourceListener listener : listeners.get(message.getAddress())) {
-                    try {
-                        listener.onMessage(message);
-                    } catch (Exception e) {
-                        log.warn("Failure during onMessage() of listener '{}'", listener, e);
-                    }
-                }
-            }
-        } finally {
-            for (MessageReader reader : readers) {
-                reader.stopAsync();
-                reader.awaitTerminated();
-            }
-            log.info("Stopped MessageSource");
+        for (MessageReader reader : readers) {
+            reader.startAsync();
+            reader.awaitRunning();
         }
+    }
+
+    @Override
+    protected void run() throws Exception {
+        while (isRunning()) {
+            Message message = messageQueue.take();
+            if (message == BREAK) {
+                break;
+            }
+
+            for (MessageSourceListener listener : listeners.get(message.getAddress())) {
+                try {
+                    listener.onMessage(message);
+                } catch (Exception e) {
+                    log.warn("Failure during onMessage() of listener '{}'", listener, e);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void shutDown() throws Exception {
+        for (MessageReader reader : readers) {
+            reader.stopAsync();
+            reader.awaitTerminated();
+        }
+
+        log.info("Stopped MessageSource");
     }
 
     private class MessageReader extends AbstractExecutionThreadService {

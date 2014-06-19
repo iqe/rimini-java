@@ -93,6 +93,23 @@ public class MessageSourceTest {
         expectNoMessage(listener);
     }
 
+    @Test
+    public void shouldAllowAddingStreamsWhileRunning() throws Exception {
+        // given
+        Arduino a6 = new Arduino(6);
+        a6.addFeature(13, new SimpleTextFeature());
+
+        TestListener a6f13Listener = new TestListener();
+        source.addListener(new Address(6, 13), a6f13Listener);
+
+        // when
+        source.addStream(a6.getStream());
+        a6.sendMessage(0, 13, 3, 'A', 'B', 'C');
+
+        // then
+        expectMessage(a6f13Listener, "ABC");
+    }
+
     private void expectMessage(TestListener listener, String content) throws InterruptedException {
         Message message = listener.messages.poll(1000, TimeUnit.MILLISECONDS);
         assertNotNull(String.format("Expected '%s', but did not receive any message", content), message);
