@@ -110,6 +110,16 @@ public class MessageSourceTest {
         expectMessage(a6f13Listener, "ABC");
     }
 
+    @Test
+    public void shouldAllowRemovingStreamsWhileRunning() throws Exception {
+        // when
+        source.removeStream(a5.getStream());
+        a5.sendMessage(0, 42, 3, 'A', 'B', 'C');
+
+        // then
+        expectNoMessage(s5f42Listener);
+    }
+
     private void expectMessage(TestListener listener, String content) throws InterruptedException {
         Message message = listener.messages.poll(1000, TimeUnit.MILLISECONDS);
         assertNotNull(String.format("Expected '%s', but did not receive any message", content), message);
