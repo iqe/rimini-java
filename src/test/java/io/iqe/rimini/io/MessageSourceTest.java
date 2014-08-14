@@ -42,15 +42,13 @@ public class MessageSourceTest {
         source.addListener(new Address(5, 43), s5f43Listener);
         source.addListener(new Address(6, 42), s6f42Listener);
 
-        source.startAsync();
-        source.awaitRunning();
+        source.start();
     }
 
     @After
     public void tearDown() throws Exception {
-        if (source != null && source.state() == State.RUNNING) {
-            source.stopAsync();
-            source.awaitTerminated();
+        if (source != null) {
+            source.stop();
         }
     }
 

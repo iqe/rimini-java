@@ -25,8 +25,7 @@ public class MessageSinkTest {
         sink = new MessageSink();
         sink.addStream(a5.getStream());
 
-        sink.startAsync();
-        sink.awaitRunning();
+        sink.start();
     }
 
     @Test
@@ -64,7 +63,6 @@ public class MessageSinkTest {
 
     @Test
     public void shouldBeStoppable() throws Exception {
-        sink.stopAsync();
-        sink.awaitTerminated(1000, TimeUnit.MILLISECONDS);
+        sink.stop(1000, TimeUnit.MILLISECONDS);
     }
 }
