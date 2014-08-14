@@ -16,7 +16,7 @@ import java.io.IOException;
  * {@link MessageOutputStream} with the same stream ID.
  */
 public class MessageStream implements Closeable {
-    private static final int DEFAULT_MAX_MESSAGE_SIZE = 128;
+    public static final int DEFAULT_MAX_MESSAGE_SIZE = 128;
 
     private MessageInputStream input;
     private MessageOutputStream output;
