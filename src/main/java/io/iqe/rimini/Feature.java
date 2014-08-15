@@ -12,4 +12,14 @@ public interface Feature<C> {
      * Parses the next bytes in {@code buffer} as message content.
      */
     C readMessageContent(MultiSignByteBuffer buffer);
+
+    /**
+     * Writes the given {@code configuration} to {@code buffer}.
+     */
+    void writeConfiguration(Object configuration, MultiSignByteBuffer buffer);
+
+    /**
+     * Parses the next bytes in {@code buffer} as a configuration.
+     */
+    Object readConfiguration(MultiSignByteBuffer buffer);
 }

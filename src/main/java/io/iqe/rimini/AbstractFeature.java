@@ -12,4 +12,15 @@ public abstract class AbstractFeature<C> implements Feature<C> {
     public C readMessageContent(MultiSignByteBuffer buf) {
         throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support reading messages");
     }
+
+    @Override
+    public Object readConfiguration(MultiSignByteBuffer buffer) {
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support reading configuration");
+
+    }
+
+    @Override
+    public void writeConfiguration(Object configuration, MultiSignByteBuffer buffer) {
+        throw new UnsupportedOperationException(getClass().getSimpleName() + " does not support writing configuration");
+    }
 }
