@@ -2,25 +2,22 @@ package io.iqe.rimini.config;
 
 import io.iqe.nio.MultiSignByteBuffer;
 import io.iqe.rimini.AbstractFeature;
-import io.iqe.rimini.FeatureRepository;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
-    private FeatureRepository features;
-
-    public RiminiConfig(FeatureRepository features) {
-        this.features = features;
-    }
-
     @Override
     public void writeMessageContent(AbstractConfigAction content, MultiSignByteBuffer buf) {
-        buf.putUnsigned(content.getActionId());
+        int actionId = content.getActionId();
 
-        switch (content.getActionId()) {
-        case ActionTypes.CONFIG_REQ_VERSION:
-            // nothing more to do
-            break;
+        buf.putUnsigned(actionId);
+
+        switch (actionId) {
+        case ActionTypes.CONFIG_REQ_FEATURES:
+            break; // Nothing more to do
         default:
-            throw new RuntimeException(); // TODO
+            throw new UnknownConfigActionException(actionId);
         }
     }
 
@@ -29,14 +26,21 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         int actionId = buf.getUnsigned();
 
         switch (actionId) {
-        case ActionTypes.CONFIG_RSP_VERSION:
-            int major = buf.getUnsigned();
-            int minor = buf.getUnsigned();
-            int patch = buf.getUnsigned();
-
-            return new VersionResponse(major, minor, patch);
+        case ActionTypes.CONFIG_RSP_FEATURES:
+            return createFeaturesResponse(buf);
         default:
-            throw new RuntimeException(); // TODO
+            throw new UnknownConfigActionException(actionId);
         }
+    }
+
+    private AbstractConfigAction createFeaturesResponse(MultiSignByteBuffer buf) {
+        int featureCount = buf.getUnsigned();
+
+        Set<Integer> featureIds = new HashSet<>();
+        for (int i = 0; i < featureCount; i++) {
+            int featureId = buf.getShort();
+            featureIds.add(featureId);
+        }
+        return new FeaturesResponse(featureIds);
     }
 }
