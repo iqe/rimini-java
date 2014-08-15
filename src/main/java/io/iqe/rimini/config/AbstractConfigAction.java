@@ -10,4 +10,9 @@ public abstract class AbstractConfigAction {
     public int getActionId() {
         return actionId;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

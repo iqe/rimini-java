@@ -13,4 +13,9 @@ public class FeaturesResponse extends AbstractConfigAction {
     public Set<Integer> getFeatureIds() {
         return featureIds;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s: %s", super.toString(), featureIds);
+    }
 }
