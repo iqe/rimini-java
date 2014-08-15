@@ -142,8 +142,8 @@ public class MessageSource {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    log.warn("{} while closing stream '{}': {}", e.getClass().getSimpleName(), stream.getStreamId(),
-                            e.getMessage());
+                    log.warn("IOException while closing stream '{}': {}",
+                            stream.getStreamId(), e.getMessage());
                 }
             }
         }
@@ -157,7 +157,7 @@ public class MessageSource {
                     try {
                         Message message = stream.readMessage();
                         log.debug("Received message {}", message);
-                        if (message.getAddress().getFeatureId() == 1) { // FIXME magic constant!
+                        if (isHeartbeat(message)) {
                             int currentStreamId = stream.getStreamId();
                             int newStreamId = (Integer) message.getContent();
 
@@ -177,6 +177,10 @@ public class MessageSource {
             } finally {
                 log.info("Stopped MessageReader for stream '{}'", stream.getStreamId());
             }
+        }
+
+        private boolean isHeartbeat(Message message) {
+            return message.getAddress().getFeatureId() == 1; // FIXME magic constant!
         }
     }
 }
