@@ -40,6 +40,15 @@ public class RiminiConfigTest {
         assertWrittenBytes(ActionTypes.CONFIG_REQ_VERSION);
     }
 
+    @Test
+    public void shouldWriteDeleteFeatureRequest() throws Exception {
+        DeleteFeatureRequest request = new DeleteFeatureRequest(5);
+
+        cfg.writeMessageContent(request, buf);
+
+        assertWrittenBytes(ActionTypes.CONFIG_REQ_DELETE, 0, 5);
+    }
+
     @Test(expected = UnknownConfigActionException.class)
     public void shouldThrownOnUnknownActionIdWhenWriting() throws Exception {
         AbstractConfigAction content = new AbstractConfigAction(255) {};
@@ -62,6 +71,15 @@ public class RiminiConfigTest {
         VersionResponse response = readMessageContent(VersionResponse.class);
 
         assertEquals("1.2.3", response.getVersion());
+    }
+
+    @Test
+    public void shouldReadDeleteFeatureResponse() throws Exception {
+        buffer(ActionTypes.CONFIG_RSP_DELETE, 0, 42);
+
+        DeleteFeatureResponse response = readMessageContent(DeleteFeatureResponse.class);
+
+        assertEquals(42, response.getErrorCode());
     }
 
     @Test(expected = UnknownConfigActionException.class)

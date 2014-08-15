@@ -17,6 +17,9 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         case ActionTypes.CONFIG_REQ_FEATURES:
         case ActionTypes.CONFIG_REQ_VERSION:
             break; // Nothing more to do
+        case ActionTypes.CONFIG_REQ_DELETE:
+            buf.putShort((short)((DeleteFeatureRequest)content).getFeatureId());
+            break;
         default:
             throw new UnknownConfigActionException(actionId);
         }
@@ -31,6 +34,8 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
             return createFeaturesResponse(buf);
         case ActionTypes.CONFIG_RSP_VERSION:
             return createVersionResponse(buf);
+        case ActionTypes.CONFIG_RSP_DELETE:
+            return createDeleteFeatureResponse(buf);
         default:
             throw new UnknownConfigActionException(actionId);
         }
@@ -53,5 +58,11 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         int patch = buf.getUnsigned();
 
         return new VersionResponse(major, minor, patch);
+    }
+
+    private AbstractConfigAction createDeleteFeatureResponse(MultiSignByteBuffer buf) {
+        int errorCode = buf.getShort();
+
+        return new DeleteFeatureResponse(errorCode);
     }
 }
