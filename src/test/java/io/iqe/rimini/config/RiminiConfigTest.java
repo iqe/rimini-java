@@ -2,6 +2,7 @@ package io.iqe.rimini.config;
 
 import static org.junit.Assert.*;
 import io.iqe.nio.MultiSignByteBuffer;
+import io.iqe.rimini.FeatureRepository;
 import io.iqe.rimini.io.MessageStream;
 import io.iqe.rimini.io.test.MessageStreamTestSupport;
 
@@ -19,7 +20,7 @@ public class RiminiConfigTest {
     @Before
     public void setUp() throws Exception {
         buf = MultiSignByteBuffer.allocate(MessageStream.DEFAULT_MAX_MESSAGE_SIZE);
-        cfg = new RiminiConfig();
+        cfg = new RiminiConfig(new FeatureRepository());
     }
 
     @Test

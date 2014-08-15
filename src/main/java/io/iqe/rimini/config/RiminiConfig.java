@@ -2,11 +2,20 @@ package io.iqe.rimini.config;
 
 import io.iqe.nio.MultiSignByteBuffer;
 import io.iqe.rimini.AbstractFeature;
+import io.iqe.rimini.Feature;
+import io.iqe.rimini.FeatureRepository;
 
+import java.nio.ByteOrder;
 import java.util.HashSet;
 import java.util.Set;
 
 public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
+    private FeatureRepository features;
+
+    public RiminiConfig(FeatureRepository features) {
+        this.features = features;
+    }
+
     @Override
     public void writeMessageContent(AbstractConfigAction content, MultiSignByteBuffer buf) {
         int actionId = content.getActionId();
@@ -17,6 +26,9 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         case ActionTypes.CONFIG_REQ_FEATURES:
         case ActionTypes.CONFIG_REQ_VERSION:
             break; // Nothing more to do
+        case ActionTypes.CONFIG_REQ_READ:
+            buf.putShort((short)((ReadFeatureRequest)content).getFeatureId());
+            break;
         case ActionTypes.CONFIG_REQ_DELETE:
             buf.putShort((short)((DeleteFeatureRequest)content).getFeatureId());
             break;
@@ -34,6 +46,8 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
             return createFeaturesResponse(buf);
         case ActionTypes.CONFIG_RSP_VERSION:
             return createVersionResponse(buf);
+        case ActionTypes.CONFIG_RSP_READ:
+            return createReadFeatureResponse(buf);
         case ActionTypes.CONFIG_RSP_DELETE:
             return createDeleteFeatureResponse(buf);
         default:
@@ -58,6 +72,45 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         int patch = buf.getUnsigned();
 
         return new VersionResponse(major, minor, patch);
+    }
+
+    private AbstractConfigAction createReadFeatureResponse(MultiSignByteBuffer buf) {
+        int featureId = buf.getShort();
+        int errorCode = buf.getShort();
+
+        if (errorCode != 0) {
+            throw new IllegalStateException(
+                    String.format("Failed to read feature %d - error %d", featureId, errorCode));
+        }
+
+        /* pins */
+        int pinCount = buf.getUnsigned();
+        Set<Integer> usedPins = new HashSet<>();
+        for (int i = 0; i < pinCount; i++) {
+            usedPins.add((int)buf.getUnsigned());
+        }
+
+        /* configuration */
+        buf.getShort(); // config size, currently not used
+
+        Feature<?> feature = features.getFeature(featureId);
+        if (feature == null) {
+            throw new IllegalStateException(); // FIXME
+        }
+        try {
+            // FIXME: Hack - due to memcpy, configuration is copied to buffer as little endian
+            //        We switch byte order when reading configuration, to make it transparent
+            //        to all the features. Maybe we should just switch to LE all together?
+            //
+            // TODO: Implement buffer class on Arduino to hide byte ordering when writing ints, etc.
+            buf.order(ByteOrder.LITTLE_ENDIAN);
+
+            Object configuration = feature.readConfiguration(buf);
+
+            return new ReadFeatureResponse(featureId, usedPins, configuration);
+        } finally {
+            buf.order(ByteOrder.BIG_ENDIAN);
+        }
     }
 
     private AbstractConfigAction createDeleteFeatureResponse(MultiSignByteBuffer buf) {
