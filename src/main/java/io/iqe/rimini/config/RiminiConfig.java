@@ -34,7 +34,7 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
     }
 
     private AbstractConfigAction createFeaturesResponse(MultiSignByteBuffer buf) {
-        int featureCount = buf.getUnsigned();
+        int featureCount = buf.getShort();
 
         Set<Integer> featureIds = new HashSet<>();
         for (int i = 0; i < featureCount; i++) {

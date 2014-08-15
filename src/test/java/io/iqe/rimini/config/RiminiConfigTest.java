@@ -39,7 +39,7 @@ public class RiminiConfigTest {
 
     @Test
     public void shouldReadFeaturesResponse() throws Exception {
-        buffer(ActionTypes.CONFIG_RSP_FEATURES, 2, 0, 1, 1, 1);
+        buffer(ActionTypes.CONFIG_RSP_FEATURES, 0, 2, 0, 1, 1, 1);
 
         AbstractConfigAction content = cfg.readMessageContent(buf);
 
