@@ -31,6 +31,15 @@ public class RiminiConfigTest {
         assertWrittenBytes(ActionTypes.CONFIG_REQ_FEATURES);
     }
 
+    @Test
+    public void shouldWriteVersionRequest() throws Exception {
+        VersionRequest request = new VersionRequest();
+
+        cfg.writeMessageContent(request, buf);
+
+        assertWrittenBytes(ActionTypes.CONFIG_REQ_VERSION);
+    }
+
     @Test(expected = UnknownConfigActionException.class)
     public void shouldThrownOnUnknownActionIdWhenWriting() throws Exception {
         AbstractConfigAction content = new AbstractConfigAction(255) {};
@@ -41,10 +50,18 @@ public class RiminiConfigTest {
     public void shouldReadFeaturesResponse() throws Exception {
         buffer(ActionTypes.CONFIG_RSP_FEATURES, 0, 2, 0, 1, 1, 1);
 
-        AbstractConfigAction content = cfg.readMessageContent(buf);
+        FeaturesResponse response = readMessageContent(FeaturesResponse.class);
 
-        assertEquals(FeaturesResponse.class, content.getClass());
-        assertEquals(set(1, 257), ((FeaturesResponse) content).getFeatureIds());
+        assertEquals(set(1, 257), response.getFeatureIds());
+    }
+
+    @Test
+    public void sholdReadVersionResponse() throws Exception {
+        buffer(ActionTypes.CONFIG_RSP_VERSION, 1, 2, 3);
+
+        VersionResponse response = readMessageContent(VersionResponse.class);
+
+        assertEquals("1.2.3", response.getVersion());
     }
 
     @Test(expected = UnknownConfigActionException.class)
@@ -65,6 +82,15 @@ public class RiminiConfigTest {
     @SuppressWarnings("unchecked")
     private <T> Set<T> set(T... elements) {
         return new HashSet<>(Arrays.asList(elements));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends AbstractConfigAction> T readMessageContent(Class<T> expectedResponseClass) {
+        AbstractConfigAction content = cfg.readMessageContent(buf);
+
+        assertEquals(expectedResponseClass, content.getClass());
+
+        return (T)content;
     }
 
     private void assertWrittenBytes(int... bytesAsInts) {

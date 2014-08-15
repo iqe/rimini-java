@@ -12,8 +12,24 @@ public class VersionResponse extends AbstractConfigAction {
         this.patch = patch;
     }
 
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
+    }
+
+    public String getVersion() {
+        return String.format("%d.%d.%d", major, minor, patch);
+    }
+
     @Override
     public String toString() {
-        return String.format("%d.%d.%d", major, minor, patch);
+        return String.format("%s: %s", super.toString(), getVersion());
     }
 }

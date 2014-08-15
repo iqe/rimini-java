@@ -15,6 +15,7 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
 
         switch (actionId) {
         case ActionTypes.CONFIG_REQ_FEATURES:
+        case ActionTypes.CONFIG_REQ_VERSION:
             break; // Nothing more to do
         default:
             throw new UnknownConfigActionException(actionId);
@@ -28,6 +29,8 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         switch (actionId) {
         case ActionTypes.CONFIG_RSP_FEATURES:
             return createFeaturesResponse(buf);
+        case ActionTypes.CONFIG_RSP_VERSION:
+            return createVersionResponse(buf);
         default:
             throw new UnknownConfigActionException(actionId);
         }
@@ -42,5 +45,13 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
             featureIds.add(featureId);
         }
         return new FeaturesResponse(featureIds);
+    }
+
+    private AbstractConfigAction createVersionResponse(MultiSignByteBuffer buf) {
+        int major = buf.getUnsigned();
+        int minor = buf.getUnsigned();
+        int patch = buf.getUnsigned();
+
+        return new VersionResponse(major, minor, patch);
     }
 }
