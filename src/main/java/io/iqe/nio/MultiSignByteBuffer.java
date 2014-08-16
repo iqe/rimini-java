@@ -63,6 +63,10 @@ public class MultiSignByteBuffer {
         return this;
     }
 
+    public ByteOrder order() {
+        return buf.order();
+    }
+
     public MultiSignByteBuffer order(ByteOrder bo) {
         buf.order(bo);
         return this;
