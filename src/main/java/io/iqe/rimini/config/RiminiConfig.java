@@ -5,7 +5,6 @@ import io.iqe.rimini.AbstractFeature;
 import io.iqe.rimini.Feature;
 import io.iqe.rimini.FeatureRepository;
 
-import java.nio.ByteOrder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,8 +22,8 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         buf.putUnsigned(actionId);
 
         switch (actionId) {
-        case ActionTypes.CONFIG_REQ_FEATURES:
         case ActionTypes.CONFIG_REQ_VERSION:
+        case ActionTypes.CONFIG_REQ_FEATURES:
             break; // Nothing more to do
         case ActionTypes.CONFIG_REQ_READ:
             buf.putShort((short)((ReadFeatureRequest)content).getFeatureId());
@@ -42,10 +41,10 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         int actionId = buf.getUnsigned();
 
         switch (actionId) {
-        case ActionTypes.CONFIG_RSP_FEATURES:
-            return createFeaturesResponse(buf);
         case ActionTypes.CONFIG_RSP_VERSION:
             return createVersionResponse(buf);
+        case ActionTypes.CONFIG_RSP_FEATURES:
+            return createFeaturesResponse(buf);
         case ActionTypes.CONFIG_RSP_READ:
             return createReadFeatureResponse(buf);
         case ActionTypes.CONFIG_RSP_DELETE:
@@ -83,23 +82,13 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
                     String.format("Failed to read feature %d - error %d", featureId, errorCode));
         }
 
-        /* pins */
-        int pinCount = buf.getUnsigned();
-        Set<Integer> usedPins = new HashSet<>();
-        for (int i = 0; i < pinCount; i++) {
-            usedPins.add((int)buf.getUnsigned());
-        }
-
-        /* configuration */
-        buf.getShort(); // config size, currently not used
-
         Feature<?> feature = features.getFeature(featureId);
         if (feature == null) {
-            throw new IllegalStateException(); // FIXME
+            throw new IllegalStateException(); // FIXME throw UnknownFeatureEx or similar
         }
         Object configuration = feature.readConfiguration(buf);
 
-        return new ReadFeatureResponse(featureId, usedPins, configuration);
+        return new ReadFeatureResponse(featureId, configuration);
     }
 
     private AbstractConfigAction createDeleteFeatureResponse(MultiSignByteBuffer buf) {

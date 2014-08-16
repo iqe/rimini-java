@@ -17,4 +17,14 @@ public class SimpleTextFeature extends AbstractFeature<String> {
         buf.putUnsigned(content.length()); // Only works for length <= 256!
         buf.put(content.getBytes());
     }
+
+    @Override
+    public Object readConfiguration(MultiSignByteBuffer buf) {
+        buf.getUnsigned(); // skip pin count
+
+        int length = buf.getUnsigned();
+        byte[] bytes = new byte[length];
+        buf.get(bytes);
+        return new String(bytes);
+    }
 }

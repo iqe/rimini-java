@@ -11,6 +11,8 @@ public class Heartbeat extends AbstractFeature<Integer> {
 
     @Override
     public Object readConfiguration(MultiSignByteBuffer buffer) {
+        buffer.getUnsigned(); // skip pin count
+
         int streamIdPin0 = buffer.getUnsigned();
         int streamIdPin1 = buffer.getUnsigned();
         int streamIdPin2 = buffer.getUnsigned();
