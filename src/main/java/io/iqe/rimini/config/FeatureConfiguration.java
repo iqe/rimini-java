@@ -1,29 +1,25 @@
 package io.iqe.rimini.config;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import io.iqe.rimini.FeatureType;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class FeatureConfiguration {
     private FeatureType featureType;
-    private Set<Integer> usedPins;
+    private List<Integer> pins;
 
-    public FeatureConfiguration(FeatureType featureType) {
+    protected FeatureConfiguration(FeatureType featureType, Collection<Integer> pins) {
         this.featureType = featureType;
-
-        usedPins = new HashSet<>();
+        this.pins = new ArrayList<>(pins);
     }
 
     public FeatureType getFeatureType() {
         return featureType;
     }
 
-    public Set<Integer> getUsedPins() {
-        return usedPins;
-    }
-
-    protected final void setUsedPins(Set<Integer> usedPins) {
-        this.usedPins = usedPins;
+    public List<Integer> getPins() {
+        return pins;
     }
 }

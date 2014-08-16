@@ -1,16 +1,16 @@
 package io.iqe.rimini.test;
 
 import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.junit.Before;
-
 import io.iqe.nio.MultiSignByteBuffer;
 import io.iqe.rimini.io.MessageStream;
 import io.iqe.rimini.io.test.MessageStreamTestSupport;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Before;
 
 public class AbstractFeatureTest {
     protected MultiSignByteBuffer buf;
@@ -32,6 +32,11 @@ public class AbstractFeatureTest {
     @SuppressWarnings("unchecked")
     protected static <T> Set<T> set(T... elements) {
         return new HashSet<>(Arrays.asList(elements));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static <T> List<T> list(T... elements) {
+        return Arrays.asList(elements);
     }
 
     protected void assertWrittenBytes(int... bytesAsInts) {

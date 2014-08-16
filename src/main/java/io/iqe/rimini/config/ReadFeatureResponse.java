@@ -1,6 +1,5 @@
 package io.iqe.rimini.config;
 
-import java.util.Set;
 
 public class ReadFeatureResponse extends AbstractConfigAction {
     private int featureId;

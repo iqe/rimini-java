@@ -27,7 +27,16 @@ public class HeartbeatTest extends AbstractFeatureTest {
 
         HeartbeatConfig config = (HeartbeatConfig) heartbeat.readConfiguration(buf);
 
-        assertEquals(set(6, 7, 8), config.getUsedPins());
+        assertEquals(list(6, 7, 8), config.getPins());
         assertEquals(4711, config.getIntervalMillis());
+    }
+
+    @Test
+    public void shouldWriteConfig() throws Exception {
+        HeartbeatConfig config = new HeartbeatConfig(5, 6, 7, 1337);
+
+        heartbeat.writeConfiguration(config, buf);
+
+        assertWrittenBytes(3, 5, 6, 7, 0, 0, 0x5, 0x39);
     }
 }

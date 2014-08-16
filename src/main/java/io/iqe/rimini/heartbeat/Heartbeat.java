@@ -20,4 +20,19 @@ public class Heartbeat extends AbstractFeature<Integer> {
 
         return new HeartbeatConfig(streamIdPin0, streamIdPin1, streamIdPin2, intervalMillis);
     }
+
+    @Override
+    public void writeConfiguration(Object configuration, MultiSignByteBuffer buf) {
+        if (!(configuration instanceof HeartbeatConfig)) {
+            throw new IllegalArgumentException(); // FIXME make it a type param or something
+        }
+
+        HeartbeatConfig config = (HeartbeatConfig) configuration;
+
+        buf.putUnsigned(config.getPins().size());
+        for (Integer pin : config.getPins()) {
+            buf.putUnsigned(pin);
+        }
+        buf.putUnsignedInt(config.getIntervalMillis());
+    }
 }

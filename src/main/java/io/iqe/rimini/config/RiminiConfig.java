@@ -25,8 +25,14 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         case ActionTypes.CONFIG_REQ_VERSION:
         case ActionTypes.CONFIG_REQ_FEATURES:
             break; // Nothing more to do
+        case ActionTypes.CONFIG_REQ_CREATE:
+            writeCreateFeatureRequest((CreateFeatureRequest) content, buf);
+            break;
         case ActionTypes.CONFIG_REQ_READ:
             buf.putShort((short)((ReadFeatureRequest)content).getFeatureId());
+            break;
+        case ActionTypes.CONFIG_REQ_UPDATE:
+            writeUpdateFeatureRequest((UpdateFeatureRequest) content, buf);
             break;
         case ActionTypes.CONFIG_REQ_DELETE:
             buf.putShort((short)((DeleteFeatureRequest)content).getFeatureId());
@@ -34,6 +40,30 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         default:
             throw new UnknownConfigActionException(actionId);
         }
+    }
+
+    private void writeCreateFeatureRequest(CreateFeatureRequest request, MultiSignByteBuffer buf) {
+        Feature<?> feature = features.getFeature(request.getFeatureId());
+        if (feature == null) {
+            throw new IllegalArgumentException(); // FIXME
+        }
+
+        buf.putShort((short)request.getFeatureId());
+        buf.putShort((short)request.getFeatureType().ordinal()); // FIXME use real to-int conversion?
+
+        feature.writeConfiguration(request.getFeatureConfig(), buf);
+    }
+
+    private void writeUpdateFeatureRequest(UpdateFeatureRequest request, MultiSignByteBuffer buf) {
+        Feature<?> feature = features.getFeature(request.getFeatureId());
+        if (feature == null) {
+            throw new IllegalArgumentException(); // FIXME
+        }
+
+        buf.putShort((short)request.getFeatureId());
+        buf.putShort((short)request.getFeatureType().ordinal()); // FIXME use real to-int conversion?
+
+        feature.writeConfiguration(request.getFeatureConfig(), buf);
     }
 
     @Override
@@ -45,8 +75,12 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
             return createVersionResponse(buf);
         case ActionTypes.CONFIG_RSP_FEATURES:
             return createFeaturesResponse(buf);
+        case ActionTypes.CONFIG_RSP_CREATE:
+            return createCreateFeatureResponse(buf);
         case ActionTypes.CONFIG_RSP_READ:
             return createReadFeatureResponse(buf);
+        case ActionTypes.CONFIG_RSP_UPDATE:
+            return createUpdateFeatureResponse(buf);
         case ActionTypes.CONFIG_RSP_DELETE:
             return createDeleteFeatureResponse(buf);
         default:
@@ -73,6 +107,12 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         return new VersionResponse(major, minor, patch);
     }
 
+    private AbstractConfigAction createCreateFeatureResponse(MultiSignByteBuffer buf) {
+        int errorCode = buf.getShort();
+
+        return new CreateFeatureResponse(errorCode);
+    }
+
     private AbstractConfigAction createReadFeatureResponse(MultiSignByteBuffer buf) {
         int featureId = buf.getShort();
         int errorCode = buf.getShort();
@@ -89,6 +129,12 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         Object configuration = feature.readConfiguration(buf);
 
         return new ReadFeatureResponse(featureId, configuration);
+    }
+
+    private AbstractConfigAction createUpdateFeatureResponse(MultiSignByteBuffer buf) {
+        int errorCode = buf.getShort();
+
+        return new UpdateFeatureResponse(errorCode);
     }
 
     private AbstractConfigAction createDeleteFeatureResponse(MultiSignByteBuffer buf) {
