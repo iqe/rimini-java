@@ -15,8 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.util.concurrent.Service.State;
-
 public class MessageSourceTest {
     private Arduino a5;
     private TestListener s5f42Listener;
