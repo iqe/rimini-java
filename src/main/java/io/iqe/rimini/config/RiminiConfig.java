@@ -97,20 +97,9 @@ public class RiminiConfig extends AbstractFeature<AbstractConfigAction> {
         if (feature == null) {
             throw new IllegalStateException(); // FIXME
         }
-        try {
-            // FIXME: Hack - due to memcpy, configuration is copied to buffer as little endian
-            //        We switch byte order when reading configuration, to make it transparent
-            //        to all the features. Maybe we should just switch to LE all together?
-            //
-            // TODO: Implement buffer class on Arduino to hide byte ordering when writing ints, etc.
-            buf.order(ByteOrder.LITTLE_ENDIAN);
+        Object configuration = feature.readConfiguration(buf);
 
-            Object configuration = feature.readConfiguration(buf);
-
-            return new ReadFeatureResponse(featureId, usedPins, configuration);
-        } finally {
-            buf.order(ByteOrder.BIG_ENDIAN);
-        }
+        return new ReadFeatureResponse(featureId, usedPins, configuration);
     }
 
     private AbstractConfigAction createDeleteFeatureResponse(MultiSignByteBuffer buf) {
